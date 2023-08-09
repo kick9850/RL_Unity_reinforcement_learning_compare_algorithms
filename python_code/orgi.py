@@ -11,7 +11,6 @@ from collections import deque
 from mlagents_envs.environment import UnityEnvironment, ActionTuple
 from mlagents_envs.side_channel.engine_configuration_channel \
     import EngineConfigurationChannel
-import gym
 action_size = 1
 
 load_model = False
