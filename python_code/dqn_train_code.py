@@ -41,7 +41,15 @@ if __name__ == '__main__':
     spec = env.behavior_specs[behavior_name]
     engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
     dec, term = env.get_steps(behavior_name)
-    agent = DQNAgent()
+    agent = DQNAgent(step=100000,
+                     epsilon_eval=0.05,
+                     epsilon_init=1.0,
+                     epsilon_min=0.1,
+                     explore_step=0.8,
+                     batch_size=32,
+                     mem_maxlen=10000,
+                     discount_factor=0.95,
+                     learning_rate=1e-4)
 
     losses, scores, episode, score = [], [], 0, 0
     total_step = 0
@@ -70,10 +78,10 @@ if __name__ == '__main__':
             if train_mode:
                 agent.append_sample(state[0], action[0], reward, next_state[0], [done])
 
-            if train_mode and step > max(batch_size, train_start_step):
+            if train_mode and total_step > max(batch_size, train_start_step):
                 loss = agent.train_model()
                 losses.append(loss)
-                if step % target_update_step == 0:
+                if total_step % target_update_step == 0:
                     agent.update_target()
 
             if done:
