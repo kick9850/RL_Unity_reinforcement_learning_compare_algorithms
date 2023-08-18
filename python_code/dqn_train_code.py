@@ -41,7 +41,7 @@ if __name__ == '__main__':
     spec = env.behavior_specs[behavior_name]
     engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
     dec, term = env.get_steps(behavior_name)
-    agent = DQNAgent(step=1000000,
+    agent = DQNAgent(step=100000,
                      epsilon_eval=0.05,
                      epsilon_init=1.0,
                      epsilon_min=0.1,
