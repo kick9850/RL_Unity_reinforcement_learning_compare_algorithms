@@ -107,9 +107,9 @@ class A2CAgent:
 
         # Actor 업데이트
         action_prob = self.actor(state)
-        print(action_prob)
-        action_log_prob = torch.log(action_prob + 1e-10)
 
+        action_log_prob = torch.log(action_prob)
+        print(action_log_prob)
         advantage = (next_value - q).detach()
         actor_loss = -(action_log_prob * advantage).mean()
 
