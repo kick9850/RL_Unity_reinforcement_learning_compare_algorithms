@@ -20,12 +20,12 @@ actor_lr = 1e-5
 critic_lr = 1e-5
 
 # 유니티 환경 경로
-game = "MyKartNormal"
+game = "multi"
 
 # 모델 저장 및 불러오기 경로
 date_time = datetime.datetime.now().strftime("%Y%m%d")
 save_path = f"./saved_models/{game}/PPO/{date_time}"
-load_path = f"./saved_models/{game}/PPO/20230801"
+load_path = f"./saved_models/{game}/PPO/{date_time}"
 
 # 연산 장치
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -63,9 +63,15 @@ class Critic(torch.nn.Module):
         self.q = torch.nn.Linear(128, 1)  # Reduce the size to 1 output unit
 
     def forward(self, state, action):
-        action = action.view(-1)
-        state_action = torch.cat([state, action], dim=0)
-
+        action = action.view(1, -1)
+        if action.numel() == 0:
+            action = torch.tensor([[0, 0]], device=action.device, dtype=action.dtype)
+        if state.numel() == 0:
+            state = torch.tensor([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], device=state.device, dtype=state.dtype)
+        print(state)
+        print(action)
+        state_action = torch.cat([state, action], dim=1)
+        #print(state_action)
         q = F.relu(self.fc1(state_action))
         q = self.q(q)
         return q
@@ -107,6 +113,7 @@ class PPOAgent:
         done = torch.FloatTensor(done).to(device)
 
         # Compute the critic loss
+        #print(next_state, action)
         target_v = self.critic(next_state, action)
         td_target = reward + self.gamma * target_v * (1 - done)
         v = self.critic(state, action)

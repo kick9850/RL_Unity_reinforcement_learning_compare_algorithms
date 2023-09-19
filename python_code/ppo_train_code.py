@@ -2,6 +2,7 @@ import numpy as np
 import platform
 import torch
 from algorithms.ppo import PPOAgent
+import itertools
 
 from mlagents_envs.environment import UnityEnvironment, ActionTuple
 from mlagents_envs.side_channel.engine_configuration_channel \
@@ -35,12 +36,14 @@ if __name__ == '__main__':
     # 유니티 브레인 설정
     behavior_name = list(env.behavior_specs.keys())
     print(behavior_name)
-    spec = env.behavior_specs[behavior_name]
-    engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
-    dec, term = env.get_steps(behavior_name)
+    for i in behavior_name:
+        spec = [env.behavior_specs[i]]
+        engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
+        dec, term = env.get_steps(i)
+    print(dec, term)
 
     # PPOAgent 클래스를 agent로 정의
-    agent = PPOAgent(state_size=48, action_size=1)
+    agents = [PPOAgent(state_size=14, action_size=2) for _ in range(3)]
     actor_losses, critic_losses, scores, episode, score = [], [], [], 0, 0
 
     total_step = 0
@@ -48,24 +51,26 @@ if __name__ == '__main__':
         for step in range(10000):
             if episode == run_ep:
                 if train_mode:
-                    agent.save_model()
+                    for agent in agents:
+                        agent.save_model()
                 print("TEST START")
                 train_mode = False
-                engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
+                engine_configuration_channel.set_configuration_parameters(time_scale=100.0)
 
-            state = dec.obs[0]
-            action = agent.get_action(state)
-            action_tuple = ActionTuple()
-            action_tuple.add_continuous(action)
-            env.set_actions(behavior_name, action_tuple)
-            env.step()
+            for agent, i in itertools.product(agents, behavior_name):
+                state = dec.obs[0]
+                action = agent.get_action(state)
+                action_tuple = ActionTuple()
+                action_tuple.add_continuous(action)
+                env.set_actions(i, action_tuple)
+                env.step()
 
-            dec, term = env.get_steps(behavior_name)
-            done = len(term.agent_id) > 0
+                dec, term = env.get_steps(i)
+                done = len(term.agent_id) > 0
 
-            reward = term.reward if done else dec.reward
-            next_state = term.obs[0] if done else dec.obs[0]
-            score += reward[0]
+                reward = term.reward if done else dec.reward
+                next_state = term.obs[0] if done else dec.obs[0]
+                score += reward[0]
             total_step += 1
             if train_mode:
                 actor_loss, critic_loss = agent.train_model(state, action, reward, next_state, np.float64([done]))
