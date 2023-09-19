@@ -68,8 +68,8 @@ class Critic(torch.nn.Module):
             action = torch.tensor([[0, 0]], device=action.device, dtype=action.dtype)
         if state.numel() == 0:
             state = torch.tensor([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]], device=state.device, dtype=state.dtype)
-        print(state)
-        print(action)
+        #print(state)
+        #print(action)
         state_action = torch.cat([state, action], dim=1)
         #print(state_action)
         q = F.relu(self.fc1(state_action))

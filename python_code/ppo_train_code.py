@@ -38,7 +38,7 @@ if __name__ == '__main__':
     print(behavior_name)
     for i in behavior_name:
         spec = [env.behavior_specs[i]]
-        engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
+        engine_configuration_channel.set_configuration_parameters(time_scale=100.0)
         dec, term = env.get_steps(i)
     print(dec, term)
 
@@ -55,7 +55,7 @@ if __name__ == '__main__':
                         agent.save_model()
                 print("TEST START")
                 train_mode = False
-                engine_configuration_channel.set_configuration_parameters(time_scale=100.0)
+                engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
 
             for agent, i in itertools.product(agents, behavior_name):
                 state = dec.obs[0]
