@@ -11,8 +11,6 @@ from mlagents_envs.side_channel.engine_configuration_channel \
     import EngineConfigurationChannel
 
 # 파라미터 값 세팅
-state_size = 12 * 4
-action_size = 1
 
 load_model = False
 train_mode = True
@@ -37,7 +35,7 @@ os.makedirs(save_path, exist_ok=True)
 
 # Actor 클래스
 class Actor(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, state_size, action_size):
         super(Actor, self).__init__()
         self.fc1 = torch.nn.Linear(state_size, 128)
         self.mu = torch.nn.Linear(128, action_size)
@@ -59,7 +57,7 @@ class Actor(torch.nn.Module):
 
 # Critic 클래스
 class Critic(torch.nn.Module):
-    def __init__(self):
+    def __init__(self, state_size, action_size):
         super(Critic, self).__init__()
         self.fc1 = torch.nn.Linear(state_size + action_size, 128)  # Reduce the size to 64 units
         self.q = torch.nn.Linear(128, 1)  # Reduce the size to 1 output unit
@@ -76,10 +74,13 @@ class Critic(torch.nn.Module):
 # PPOAgent 클래스 다양한 함수정의
 class PPOAgent:
     def __init__(self, state_size, action_size):
+
+        self.state_size = state_size
+        self.action_size = action_size
         # Initialize the actor and critic
-        self.actor = Actor().to(device)
+        self.actor = Actor(self.state_size, self.action_size).to(device)
         self.actor_optimizer = torch.optim.Adam(self.actor.parameters(), lr=actor_lr)
-        self.critic = Critic().to(device)
+        self.critic = Critic(self.state_size, self.action_size).to(device)
         self.critic_optimizer = torch.optim.Adam(self.critic.parameters(), lr=critic_lr)
 
         # Initialize the tensorboard writer

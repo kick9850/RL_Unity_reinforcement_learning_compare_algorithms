@@ -20,7 +20,7 @@ print_interval = 10
 save_interval = 100
 
 # 유니티 환경 경로
-game = "MyKartNormal"
+game = "multi"
 os_name = platform.system()
 if os_name == 'Windows':
     env_name = f"../envs/{game}/{game}"
@@ -33,7 +33,8 @@ if __name__ == '__main__':
     env.reset()
 
     # 유니티 브레인 설정
-    behavior_name = list(env.behavior_specs.keys())[0]
+    behavior_name = list(env.behavior_specs.keys())
+    print(behavior_name)
     spec = env.behavior_specs[behavior_name]
     engine_configuration_channel.set_configuration_parameters(time_scale=1.0)
     dec, term = env.get_steps(behavior_name)
